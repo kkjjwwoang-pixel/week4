@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.9">
+  <title>슈뢰딩거의 고양이 상자 꾸미기</title>
+  <style>
+    @font-face {
+      font-family: 'GounBatang';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunBatang-Regular.woff') format('woff');
+      font-weight: normal;
+      font-display: swap;
+    }
+
+    body {
+      font-family: 'GounBatang';
+      text-align: center;
+      background: #00FF00;
+      color: black;
+      margin: 0;
+      font-size: 30px;
+      padding: 0;
+    }
+
+    .container {
+      display: flex; position: relative; justify-content: center;
+      gap: 20px;
+      align-items: center;
+      margin-top: 300px;
+    }
+
+    .item {
+      text-align: center;
+      position: relative;
+    }
+
+    .namepad-item, .mealkit-item {
+      margin-top: 150px;
+    }
+
+    .item img {
+      max-width: none;
+      height: auto;
+    }
+
+    .cat-name {
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%) rotate(5deg);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+      width: 200px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: red;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #ff4d4d;
+    }
+
+    .hidden {
+      opacity: 0;
+      position: absolute;
+      bottom: -100px;
+      transition: all 2s ease-in-out;
+      z-index: -1;
+    }
+
+    .show {
+      opacity: 1;
+      bottom: 80px;
+    }
+
+    h1 {
+      margin-bottom: 50px;
+    }
+
+    h2 {
+      font-size: 15px;
+      margin-bottom: 20px;
+      color: black;
+    }
+
+    #catImageContent {
+      position: absolute;
+      left: calc(50% + 900px);
+      transform: translateX(-50%);
+      z-index: -1;
+      bottom: 100px;
+      transition: all 2s ease-in-out;
+    }
+
+    #deadCatImageContent {
+      position: absolute;
+      left: calc(50% + 900px);
+      transform: translateX(-50%);
+      z-index: -1;
+      bottom: 100px;
+      transition: all 2s ease-in-out;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 200px;
+    }
+
+    .active {
+      background-color: blue;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div>
+    <h1>Schrödinger's cat Box</h1>
+  </div>
+    <h2>상자와 밥그릇을 클릭하여, 살아있거나 죽어있는 고양이가 든 상자를 꾸며보세요</h2>
+  <div class="container">
+    <div class="item namepad-item">
+      <img src="namepad.png" alt="팻말 이미지">
+      <div class="cat-name" id="catSign">고양이 이름</div>
+    </div>
+
+    <div class="item">
+      <img src="box.png" alt="상자 이미지" id="boxImage">
+    </div>
+
+    <div class="item mealkit-item">
+      <img src="mealkit.png" alt="밥그릇 이미지" id="mealkitImage">
+    </div>
+  </div>
+
+  <div class="hidden" id="catImage">
+    <img src="cat.png" alt="고양이 이미지" id="catImageContent">
+  </div>
+  <div class="hidden" id="deadCatImage">
+    <img src="deadcat.png" alt="죽은 고양이 이미지" id="deadCatImageContent">
+  </div>
+
+  <audio id="aliveSound" src="alivesound.mp3" preload="auto"></audio>
+  <audio id="deadSound" src="deadsound.mp3" preload="auto"></audio>
+
+  <script>
+    let boxIndex = 0;
+    let mealkitIndex = 0;
+
+    function setCatName() {
+      const catName = document.getElementById("catName").value;
+      const sign = document.getElementById("catSign");
+
+      if (catName) {
+        sign.textContent = `${catName}`;
+      } else {
+        sign.textContent = "고양이 이름";
+      }
+    }
+
+    const boxImage = document.getElementById("boxImage");
+
+    boxImage.addEventListener('click', function() {
+      const boxImages = [
+        'box1.png',
+        'box2.png',
+        'box3.png',
+        'box4.png',
+        'box5.png',
+        'box6.png'
+      ];
+
+      // 순차적으로 이미지 변경
+      boxImage.src = boxImages[boxIndex];
+      boxIndex = (boxIndex + 1) % boxImages.length; // 끝까지 가면 처음으로 돌아가도록 설정
+    });
+
+    const mealkitImage = document.getElementById("mealkitImage");
+
+    mealkitImage.addEventListener('click', function() {
+      const mealkitImages = [
+        'mealkit1.png',
+        'mealkit2.png',
+        'mealkit3.png',
+        'mealkit4.png',
+        'mealkit5.png',
+        'mealkit6.png'
+      ];
+
+      mealkitImage.src = mealkitImages[mealkitIndex];
+      mealkitIndex = (mealkitIndex + 1) % mealkitImages.length;
+    });
+
+    let isBoxOpen = false;
+
+    function openBox() {
+      if (isBoxOpen) return;
+
+      const randomIndex = Math.floor(Math.random() * 2);
+      const randomCase = randomIndex === 0 ? 'cat' : 'deadcat';
+
+      if (randomCase === 'cat') {
+        document.getElementById("catImage").classList.add("show");
+        const catImage = document.getElementById("catImageContent");
+        const aliveSound = document.getElementById("aliveSound");
+        aliveSound.play();
+
+        catImage.addEventListener('click', function() {
+          location.reload();
+        });
+      } else {
+        document.getElementById("deadCatImage").classList.add("show");
+        const deadCat = document.getElementById("deadCatImageContent");
+        const deadSound = document.getElementById("deadSound");
+        deadSound.play();
+
+        deadCat.addEventListener('click', function() {
+          location.reload();
+        });
+      }
+
+      isBoxOpen = true;
+
+      const openButton = document.querySelector("button");
+      openButton.classList.add("active");
+      openButton.textContent = "다시하기";
+
+      openButton.onclick = function() {
+        location.reload();
+      };
+    }
+  </script>
+
+  <input type="text" id="catName" placeholder="고양이 이름을 입력하세요">
+  <button onclick="setCatName()">확인</button>
+
+  <div class="button-container">
+    <button onclick="openBox()">상자 열어보기</button>
+  </div>
+
+</body>
+</html>
